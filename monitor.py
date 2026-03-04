@@ -29,7 +29,7 @@ JOURNALS = [
 
 SEEN_FILE = 'seen_ids.json'
 
-DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1478648598437822575/st5j71dlt8vNX5i8Ays07nluK2rVO0yPzPv7fa_DMcm2rAlk-mhcHZwHsgsoujcfjA4X'
+DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
 
 
 ## Loading and saving seen arXiv IDs
