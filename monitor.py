@@ -32,24 +32,25 @@ JOURNALS = [
 ]
 
 SEEN_IDS_FILE = 'seen_ids.json'
-
 DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
+MAX_SEEN = 800
 
 
 ## Loading and saving seen arXiv IDs
 def load_seen_ids():
     if not os.path.exists(SEEN_IDS_FILE):
-        return set()
+        return []
 
     with open(SEEN_IDS_FILE, "r") as f:
         try:
-            return set(json.load(f))
+            return json.load(f)
         except json.JSONDecodeError:
-            return set()
+            return []
     
 def save_seen_ids(seen_ids):
+    trimmed = seen_ids[-MAX_SEEN:]
     with open(SEEN_IDS_FILE, 'w') as f:
-        json.dump(list(seen_ids), f)
+        json.dump(list(trimmed), f)
 
 
 ## Keyword and journal matching
@@ -68,7 +69,7 @@ def journal_match(comment):
     )
 
 
-##
+## Subject extraction
 def get_subjects(entry):
     if not hasattr(entry, 'tags'):
         return "N/A"
@@ -106,7 +107,8 @@ def main():
     feed = feedparser.parse(ARXIV_API)
 
     seen_ids = load_seen_ids()
-    new_seen_ids = set(seen_ids)
+    seen_set = set(seen_ids)
+    new_seen_ids = list(seen_ids)
 
     for entry in feed.entries:
         arxiv_id = entry.id
@@ -116,13 +118,14 @@ def main():
         comment = entry.get("arxiv_comment", None)
         subjects = get_subjects(entry)
 
-        if arxiv_id in seen_ids:
+        if arxiv_id in seen_set:
             continue
 
         if keyword_match(title, summary) and journal_match(comment):
             send_to_discord(title, link, comment, subjects)
 
-        new_seen_ids.add(arxiv_id)
+        new_seen_ids.append(arxiv_id)
+        seen_set.add(arxiv_id)
 
     save_seen_ids(new_seen_ids)
     print("Done.")
