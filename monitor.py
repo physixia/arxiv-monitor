@@ -76,8 +76,7 @@ def journal_match(comment):
     return any(j in comment for j in JOURNALS) and (
         "submitted" in comment.lower() or
         "accepted" in comment.lower() or
-        "published" in comment.lower() or
-        "to" in comment.lower()
+        "published" in comment.lower()
     )
 
 
@@ -134,6 +133,9 @@ def get_best_link(entry):
             html_link = link.get("href")
         if link.get("type") == "application/pdf":
             pdf_link = link.get("href")
+    
+    if not html_link and not pdf_link:
+        return entry.id
     
     return html_link if html_link else pdf_link
 
