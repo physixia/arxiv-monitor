@@ -8,16 +8,16 @@ from datetime import datetime
 ARXIV_API = "http://export.arxiv.org/api/query?search_query=all&sortBy=submittedDate&sortOrder=descending&max_results=300"
 
 KEYWORDS = [
-    'MHD',
-    'X-ray',
-    'X-rays',
-    'SN',
-    'SNe',
-    'magnetohydrodynamics',
-    'TeV',
-    'PeV',
-    'EeV',
-    'XRISM',
+    # 'MHD',
+    # 'X-ray',
+    # 'X-rays',
+    # 'SN',
+    # 'SNe',
+    # 'magnetohydrodynamics',
+    # 'TeV',
+    # 'PeV',
+    # 'EeV',
+    # 'XRISM',
 ]
 
 JOURNALS = [
@@ -31,9 +31,19 @@ JOURNALS = [
     'Astronomy & Astrophysics',
 ]
 
+SUBJECT_ROUTING = {
+    'astro-ph.CO': os.environ['CHANNEL_CO'],
+    'astro-ph.EP': os.environ['CHANNEL_EP'],
+    'astro-ph.GA': os.environ['CHANNEL_GA'],
+    'astro-ph.HE': os.environ['CHANNEL_HE'],
+    'astro-ph.IM': os.environ['CHANNEL_IM'],
+    'astro-ph.SR': os.environ['CHANNEL_SR'],
+}
+
 SEEN_IDS_FILE = 'seen_ids.json'
-DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
+# DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
 MAX_SEEN = 800
+DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 
 
 ## Loading and saving seen arXiv IDs
@@ -55,6 +65,8 @@ def save_seen_ids(seen_ids):
 
 ## Keyword and journal matching
 def keyword_match(title, summary):
+    if not KEYWORDS:
+        return True
     text = (title + ' ' + summary).lower()
     return any(k.lower() in text for k in KEYWORDS)
 
@@ -76,15 +88,40 @@ def get_subjects(entry):
     return ','.join(tag['term'] for tag in entry.tags)
 
 
+## Routing based on subjects
+def route_by_subject(entry):
+    if not hasattr(entry, 'arxiv_primary_category'):
+        return None
+
+    primary = entry.arxiv_primary_category['term']
+
+    if not primary.startswith('astro-ph'):
+        return None
+
+    return SUBJECT_ROUTING.get(primary)
+
+
 ## Discord notification
-def send_to_discord(title, link, comment, subjects):
+def send_to_discord(channel_id, title, link, comment, subjects):
+
+    url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
+    headers = {
+        "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
+    }
     message = (
         f"**{title}**\n"
         f"**Subjects: {subjects}**\n"
         f"{link}\n"
         f"Comment: {comment}"
     )
-    requests.post(DISCORD_WEBHOOK_URL, json={'content': message})
+    
+    response = requests.post(
+        url,
+        headers=headers,
+        json={"content": message}
+    )
+    if response.status_code not in (200, 201):
+        print("Discord error:", response.status_code, response.text)
 
 
 ## Link selection
@@ -117,12 +154,16 @@ def main():
         link = get_best_link(entry)
         comment = entry.get("arxiv_comment", None)
         subjects = get_subjects(entry)
+        # webhook = route_by_subject(entry)
+        channel_id = route_by_subject(entry)
 
         if arxiv_id in seen_set:
             continue
+        if not channel_id:
+            continue
 
-        if keyword_match(title, summary) and journal_match(comment):
-            send_to_discord(title, link, comment, subjects)
+        if keyword_match(title, summary) and journal_match(comment) and channel_id:
+            send_to_discord(channel_id, title, link, comment, subjects)
 
         new_seen_ids.append(arxiv_id)
         seen_set.add(arxiv_id)

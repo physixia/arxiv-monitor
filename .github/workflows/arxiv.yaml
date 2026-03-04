@@ -3,6 +3,9 @@ name: arXiv Monitor
 on:
   schedule:
     - cron: "0 */3 * * *"
+  push:
+    branches:
+      - feature/**
   workflow_dispatch:
 
 permissions:
@@ -27,6 +30,14 @@ jobs:
         run: python monitor.py
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
+          CHANNEL_CO: ${{ secrets.CHANNEL_CO }}
+          CHANNEL_EP: ${{ secrets.CHANNEL_EP }}
+          CHANNEL_GA: ${{ secrets.CHANNEL_GA }}
+          CHANNEL_HE: ${{ secrets.CHANNEL_HE }}
+          CHANNEL_IM: ${{ secrets.CHANNEL_IM }}
+          CHANNEL_SR: ${{ secrets.CHANNEL_SR }}
+          CHANNEL_OTHERS: ${{ secrets.CHANNEL_OTHERS }}
 
       - name: Commit updated IDs
         run: |
