@@ -5,7 +5,13 @@ import os
 from datetime import datetime
 
 ## Settings
-ARXIV_API = "http://export.arxiv.org/api/query?search_query=all&sortBy=submittedDate&sortOrder=descending&max_results=300"
+ARXIV_API = (
+    "http://export.arxiv.org/api/query?"
+    "search_query=cat:astro-ph.*"
+    "&sortBy=submittedDate"
+    "&sortOrder=descending"
+    "&max_results=300"
+)
 
 KEYWORDS = [
     # 'MHD',
