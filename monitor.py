@@ -159,14 +159,15 @@ def main():
 
         if arxiv_id in seen_set:
             continue
+
+        new_seen_ids.append(arxiv_id)
+        seen_set.add(arxiv_id)
+
         if not channel_id:
             continue
 
         if keyword_match(title, summary) and journal_match(comment) and channel_id:
             send_to_discord(channel_id, title, link, comment, subjects)
-
-        new_seen_ids.append(arxiv_id)
-        seen_set.add(arxiv_id)
 
     save_seen_ids(new_seen_ids)
     print("Done.")
