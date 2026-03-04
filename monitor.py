@@ -143,12 +143,15 @@ def send_to_discord(channel_id, arxiv_id, title, link, comment, subjects):
     headers = {
         "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
     }
+    separator = "─" * 40
     message = (
+        f"{separator}\n"
         f"**{title}**\n"
-        f"**Subjects: {subjects}**\n"
-        f"{link}\n"
-        f"Comment: {comment}"
-        f"arXiv: {arxiv_id}\n"
+        f"**Subjects:** {subjects}\n"
+        f"**Journal Info:** {comment}\n"
+        f"**arXiv ID:** `{arxiv_id}`\n"
+        f"**Link:** {link}\n"
+        f"{separator}"
     )
     
     response = requests.post(
