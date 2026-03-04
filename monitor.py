@@ -14,6 +14,10 @@ KEYWORDS = [
     'SN',
     'SNe',
     'magnetohydrodynamics',
+    'TeV',
+    'PeV',
+    'EeV',
+    'XRISM',
 ]
 
 JOURNALS = [

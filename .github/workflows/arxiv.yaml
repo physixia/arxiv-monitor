@@ -1,0 +1,34 @@
+name: arXiv Monitor
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install feedparser requests
+
+      - name: Run monitor
+        run: python monitor.py
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Commit updated IDs
+        run: |
+          git config user.name github-actions
+          git config user.email actions@github.com
+          git add seen_ids.json
+          git commit -m "update seen ids" || echo "no changes"
+          git push
