@@ -3,6 +3,7 @@ import requests
 import json
 import os
 from datetime import datetime
+import time
 
 ## Settings
 ARXIV_API = (
@@ -10,7 +11,7 @@ ARXIV_API = (
     "search_query=cat:astro-ph.*"
     "&sortBy=submittedDate"
     "&sortOrder=descending"
-    "&max_results=300"
+    "&max_results=50"
 )
 
 KEYWORDS = [
@@ -50,6 +51,7 @@ SEEN_IDS_FILE = 'seen_ids.json'
 MAX_SEEN = 800
 DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 ABSTRACT_CHANNEL_ID = os.environ["CHANNEL_ABSTRACT"]
+POST_INTERVAL = 1.2  # seconds
 
 
 ## Loading and saving seen arXiv IDs
@@ -113,8 +115,29 @@ def route_by_subject(entry):
     return SUBJECT_ROUTING.get(primary)
 
 
+def build_abstract_message(arxiv_id, title, summary, subjects):
+
+    header = (
+        f"arXiv: {arxiv_id}\n"
+        f"Title: {title}\n"
+        f"Subjects: {subjects}\n\n"
+        f"Abstract:\n"
+    )
+
+    max_summary_length = 2000 - len(header)
+
+    if len(summary) > max_summary_length:
+        truncated_notice = "\n\n(Abstract was truncated due to Discord character limit.)"
+        max_summary_length -= len(truncated_notice)
+        summary = summary[:max_summary_length] + truncated_notice
+
+    return header + summary
+
+
 ## Discord notification
 def send_to_discord(channel_id, arxiv_id, title, link, comment, subjects):
+
+    time.sleep(POST_INTERVAL)  # To avoid hitting rate limits
 
     url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
     headers = {
@@ -138,18 +161,15 @@ def send_to_discord(channel_id, arxiv_id, title, link, comment, subjects):
 
 
 def send_abstract_to_discord(arxiv_id, title, summary, subjects):
+
+    time.sleep(POST_INTERVAL)  # To avoid hitting rate limits
     
     url = f"https://discord.com/api/v10/channels/{ABSTRACT_CHANNEL_ID}/messages"
     headers = {
         'Authorization': f'Bot {DISCORD_BOT_TOKEN}',
     }
 
-    message = (
-        f"arXiv: {arxiv_id}\n"
-        f"Title: {title}\n"
-        f"Subjects: {subjects}\n\n"
-        f"Abstract:\n{summary}"
-    )
+    message = build_abstract_message(arxiv_id, title, summary, subjects)
 
     response = requests.post(
         url,
