@@ -3,6 +3,9 @@ name: arXiv Monitor
 on:
   schedule:
     - cron: "0 */3 * * *"
+  push:
+    branches:
+      - feature/**
   workflow_dispatch:
 
 permissions:
