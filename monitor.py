@@ -41,9 +41,9 @@ SUBJECT_ROUTING = {
 }
 
 SEEN_IDS_FILE = 'seen_ids.json'
-# DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
 MAX_SEEN = 800
 DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
+ABSTRACT_CHANNEL_ID = os.environ["CHANNEL_ABSTRACT"]
 
 
 ## Loading and saving seen arXiv IDs
@@ -56,11 +56,18 @@ def load_seen_ids():
             return json.load(f)
         except json.JSONDecodeError:
             return []
-    
 def save_seen_ids(seen_ids):
     trimmed = seen_ids[-MAX_SEEN:]
     with open(SEEN_IDS_FILE, 'w') as f:
         json.dump(list(trimmed), f)
+
+
+## ID extraction
+def extract_arxiv_id(entry_id):
+    if not entry_id:
+        return None
+    base = entry_id.split('/')[-1]
+    return base.split('v')[0] if 'v' in base else base
 
 
 ## Keyword and journal matching
@@ -101,7 +108,7 @@ def route_by_subject(entry):
 
 
 ## Discord notification
-def send_to_discord(channel_id, title, link, comment, subjects):
+def send_to_discord(channel_id, arxiv_id, title, link, comment, subjects):
 
     url = f"https://discord.com/api/v10/channels/{channel_id}/messages"
     headers = {
@@ -112,8 +119,32 @@ def send_to_discord(channel_id, title, link, comment, subjects):
         f"**Subjects: {subjects}**\n"
         f"{link}\n"
         f"Comment: {comment}"
+        f"arXiv: {arxiv_id}\n"
     )
     
+    response = requests.post(
+        url,
+        headers=headers,
+        json={"content": message}
+    )
+    if response.status_code not in (200, 201):
+        print("Discord error:", response.status_code, response.text)
+
+
+def send_abstract_to_discord(arxiv_id, title, summary, subjects):
+    
+    url = f"https://discord.com/api/v10/channels/{ABSTRACT_CHANNEL_ID}/messages"
+    headers = {
+        'Authorization': f'Bot {DISCORD_BOT_TOKEN}',
+    }
+
+    message = (
+        f"arXiv: {arxiv_id}\n"
+        f"Title: {title}\n"
+        f"Subjects: {subjects}\n\n"
+        f"Abstract:\n{summary}"
+    )
+
     response = requests.post(
         url,
         headers=headers,
@@ -169,7 +200,10 @@ def main():
             continue
 
         if keyword_match(title, summary) and journal_match(comment) and channel_id:
-            send_to_discord(channel_id, title, link, comment, subjects)
+            clean_id = extract_arxiv_id(arxiv_id)
+
+            send_to_discord(channel_id, clean_id, title, link, comment, subjects)
+            send_abstract_to_discord(clean_id, title, summary, subjects)
 
     save_seen_ids(new_seen_ids)
     print("Done.")
