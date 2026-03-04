@@ -31,20 +31,24 @@ JOURNALS = [
     'Astronomy & Astrophysics',
 ]
 
-SEEN_FILE = 'seen_ids.json'
+SEEN_IDS_FILE = 'seen_ids.json'
 
 DISCORD_WEBHOOK_URL = os.environ["DISCORD_WEBHOOK_URL"]
 
 
 ## Loading and saving seen arXiv IDs
 def load_seen_ids():
-    if not os.path.exists(SEEN_FILE):
+    if not os.path.exists(SEEN_IDS_FILE):
         return set()
-    with open(SEEN_FILE, 'r') as f:
-        return set(json.load(f))
+
+    with open(SEEN_IDS_FILE, "r") as f:
+        try:
+            return set(json.load(f))
+        except json.JSONDecodeError:
+            return set()
     
 def save_seen_ids(seen_ids):
-    with open(SEEN_FILE, 'w') as f:
+    with open(SEEN_IDS_FILE, 'w') as f:
         json.dump(list(seen_ids), f)
 
 
