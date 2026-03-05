@@ -232,7 +232,7 @@ def main():
         title = entry.title
         summary = entry.summary
         link = get_best_link(entry)
-        comment = entry.get("arxiv_comment", None)
+        comment = getattr(entry, "arxiv_comment", None)
         subjects = get_subjects(entry)
         # webhook = route_by_subject(entry)
         channel_id = route_by_subject(entry)
