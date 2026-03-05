@@ -220,7 +220,7 @@ def get_best_link(entry):
 
 # ==== Main monitoring function ====
 def main():
-    print("Fethching arXiv data...")
+    print("Fetching arXiv data...")
     feed = feedparser.parse(ARXIV_API)
 
     seen_ids = load_seen_ids()
