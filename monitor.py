@@ -12,7 +12,7 @@ ARXIV_API = (
     "search_query=cat:astro-ph.*"
     "&sortBy=submittedDate"
     "&sortOrder=descending"
-    "&max_results=300"
+    "&max_results=200"
 )
 
 KEYWORDS = [
