@@ -175,7 +175,8 @@ def send_to_discord(channel_id, arxiv_id, title, link, comment, subjects):
     response = requests.post(
         url,
         headers=headers,
-        json={"content": message}
+        json={"content": message},
+        timeout=10
     )
     if response.status_code not in (200, 201):
         print("Discord error:", response.status_code, response.text)
