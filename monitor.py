@@ -2,6 +2,7 @@ import feedparser
 import requests
 import json
 import os
+import re
 from datetime import datetime
 import time
 
@@ -117,19 +118,36 @@ def route_by_subject(entry):
 
 def build_abstract_message(arxiv_id, title, summary, subjects):
 
-    header = (
+    MAX_TOTAL_LENGTH = 1950
+
+    header_template = (
         f"arXiv: {arxiv_id}\n"
         f"Title: {title}\n"
         f"Subjects: {subjects}\n"
-        f"Abstract:\n"
+        "Truncated: {is_truncated}\n"
+        "Abstract:\n"
     )
 
-    max_summary_length = 2000 - len(header)
+    max_summary_length = MAX_TOTAL_LENGTH - len(header_template.format(is_truncated=False))
+
+    is_truncated = False
 
     if len(summary) > max_summary_length:
-        truncated_notice = "\n\n(Abstract was truncated due to Discord character limit.)"
-        max_summary_length -= len(truncated_notice)
-        summary = summary[:max_summary_length] + truncated_notice
+        is_truncated = True
+        cut_summary = summary[:max_summary_length]
+
+        matches = list(re.finditer(r'\.\s+(?=[A-Z][0-9])', cut_summary))
+        if matches:
+            last_match = matches[-1]
+            summary = cut_summary[:last_match.start() + 1]
+        else:
+            last_period_idx = cut_summary.rfind('. ')
+            if last_period_idx != -1:
+                summary = cut_summary[:last_period_idx + 1]
+            else:
+                summary = cut_summary
+
+    header = header_template.format(is_truncated=is_truncated)
 
     return header + summary
 
