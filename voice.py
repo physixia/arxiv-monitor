@@ -9,6 +9,8 @@ import io
 import wave
 from pathlib import Path
 import deepl
+from dotenv import load_dotenv
+load_dotenv()
 
 
 # ================= SETTINGS =================
