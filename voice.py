@@ -16,6 +16,7 @@ load_dotenv()
 # ================= SETTINGS =================
 DISCORD_VOICE_TOKEN = os.environ["DISCORD_VOICE_TOKEN"]
 ABSTRACT_CHANNEL_ID = int(os.environ["CHANNEL_ABSTRACT"])
+LOG_CHANNEL_ID = int(os.environ["CHANNEL_LOG"])
 
 # VOICEVOX engine
 VOICEVOX_API_URL = "http://127.0.0.1:50021"
@@ -218,7 +219,7 @@ async def on_ready():
             "astro-ph.GA": "銀河天体物理学",
             "astro-ph.HE": "高エネルギー天体物理学",
             "astro-ph.IM": "検出器と測定手法",
-            "astro-ph.SR": "太陽物理学および恒星系物理学"
+            "astro-ph.SR": "太陽物理学および恒星物理学"
         }
         subjects_ja = subjects_mapping.get(parsed["subjects"], parsed["subjects"])
 
@@ -249,9 +250,36 @@ async def on_ready():
 
         await asyncio.sleep(POST_INTERVAL)  # To avoid hitting rate limits
 
-    save_processed(processed_list)
+    remaining_count = 0
+    for msg in recent_messages:
+        if str(msg.id) not in processed_set:
+            parsed = parse_message(msg.content)
+            if parsed["arxiv_id"] and parsed["title"] and parsed["subjects"] and parsed["abstract"]:
+                remaining_count += 1
+
+    log_channel = client.get_channel(LOG_CHANNEL_ID)
+    if log_channel:
+        bot_name = "ナースロボ＿タイプarXiv"
+        
+        if remaining_count > 0:
+            report_msg = (
+                f"🎙️ **[{bot_name} | 音声変換レポート]**\n"
+                f"お疲れ様です。当機による音声化処理が完了しました。今回処理した論文は **{processed_count}** 件です。\n"
+                f"まだ未変換のアブストラクトが **{remaining_count}** 件残っています。引き続き、適度な休憩を挟みつつ確認をお願いします。"
+            )
+        else:
+            report_msg = (
+                f"🎙️ **[{bot_name} | 音声変換レポート]**\n"
+                f"お疲れ様です。当機による音声化処理が完了しました。今回処理した論文は **{processed_count}** 件です。\n"
+                f"現在のところ、未変換のアブストラクトはありません。本日の業務は終了ですね。お休みなさい、お大事に。"
+            )
+        await log_channel.send(report_msg)
+    else:
+        print(f"Error: Log channel with ID {LOG_CHANNEL_ID} not found. Cannot send log message.")
+    
+    save_processed(processed_list)  # Final save
     print("All done. Processed IDs saved.")
-    await client.close()
+    await client.close()  # Close the client after processing
 
 
 # ================== Entry point =================
