@@ -52,6 +52,7 @@ SEEN_IDS_FILE = 'seen_ids.json'
 MAX_SEEN = 2000
 DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 ABSTRACT_CHANNEL_ID = os.environ["CHANNEL_ABSTRACT"]
+LOG_CHANNEL_ID = os.environ["CHANNEL_LOG"]
 POST_INTERVAL = 1.2  # seconds
 
 
@@ -196,7 +197,45 @@ def send_abstract_to_discord(arxiv_id, title, summary, subjects):
     response = requests.post(
         url,
         headers=headers,
-        json={"content": message}
+        json={"content": message},
+        timeout=10
+    )
+    if response.status_code not in (200, 201):
+        print("Discord error:", response.status_code, response.text)
+
+
+def send_log_to_discord(fetched_count, hit_count, channel_counts):
+    time.sleep(POST_INTERVAL)  # To avoid hitting rate limits
+
+    breakdown = '\n'.join([f"・ `{subj}`: {count}件" for subj, count in channel_counts.items() if count > 0])
+
+    if hit_count > 0:
+        message = (
+            f"🌠 **[arXiv courier | 配達レポート]**\n"
+            f"こちらクーリエ！　最新アーカイブの周回軌道から戻りました！🚀\n\n"
+            f"新しくスキャンした論文は **{fetched_count}** 件、"
+            f"そのうち指定の条件に合う **{hit_count}** 件の Abstract を各ステーションへ配達済みです！\n\n"
+            f"📊 **【配達内訳】**\n{breakdown}\n\n"
+            f"次の巡回まで、ステーションで待機しますね！"
+        )
+    else:
+        message = (
+            f"🌠 **[arXiv courier | 配達レポート]**\n"
+            f"こちらクーリエ！　最新アーカイブの周回軌道から戻りました！🚀\n\n"
+            f"新しくスキャンした論文は **{fetched_count}** 件でしたが、"
+            f"今回は条件に合う論文は見つかりませんでした。\n\n"
+            f"次の巡回まで、ステーションで待機しますね！"
+        )
+
+    url = f"https://discord.com/api/v10/channels/{LOG_CHANNEL_ID}/messages"
+    headers = {
+        "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
+    }
+    response = requests.post(
+        url,
+        headers=headers,
+        json={"content": message},
+        timeout=10
     )
     if response.status_code not in (200, 201):
         print("Discord error:", response.status_code, response.text)
@@ -228,6 +267,17 @@ def main():
     seen_set = set(seen_ids)
     new_seen_ids = list(seen_ids)
 
+    fetched_count = 0
+    hit_count = 0
+    channel_counts = {
+        'astro-ph.CO': 0,
+        'astro-ph.EP': 0,
+        'astro-ph.GA': 0,
+        'astro-ph.HE': 0,
+        'astro-ph.IM': 0,
+        'astro-ph.SR': 0,
+    }
+
     for entry in reversed(feed.entries):
         arxiv_id = entry.id
         title = entry.title
@@ -244,6 +294,8 @@ def main():
         new_seen_ids.append(arxiv_id)
         seen_set.add(arxiv_id)
 
+        fetched_count += 1
+
         if not channel_id:
             continue
 
@@ -253,8 +305,16 @@ def main():
             send_to_discord(channel_id, clean_id, title, link, comment, subjects)
             send_abstract_to_discord(clean_id, title, summary, subjects)
 
+            hit_count += 1
+            if hasattr(entry, 'arxiv_primary_category'):
+                primary = entry.arxiv_primary_category['term']
+                if primary in channel_counts:
+                    channel_counts[primary] += 1
+
     save_seen_ids(new_seen_ids)
     print("Done.")
+
+    send_log_to_discord(fetched_count, hit_count, channel_counts)
 
 
 # ==== Entry point ====
