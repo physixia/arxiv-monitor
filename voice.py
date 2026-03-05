@@ -178,6 +178,11 @@ client = discord.Client(intents=intents)
 
 @client.event
 async def on_ready():
+    
+    if getattr(client, "has_run", False):
+        return
+    client.has_run = True
+
     print("Nurse Robot Type T is ready!")
 
     processed_list = load_processed()
@@ -191,6 +196,9 @@ async def on_ready():
 
     recent_messages = [msg async for msg in channel.history(limit=150)]
     recent_messages.reverse()  # Process from oldest to newest
+
+    processed_count = 0
+    MAX_PROCESS = 5
     for msg in recent_messages:
         if str(msg.id) in processed_set:
             continue
@@ -233,6 +241,12 @@ async def on_ready():
         processed_list.append(str(msg.id))
         processed_set.add(str(msg.id))
         save_processed(processed_list)  # Save after each message to avoid data loss
+
+        processed_count += 1
+        if processed_count >= MAX_PROCESS:
+            print(f"Reached the maximum limit of {MAX_PROCESS} papers. Stopping for now.")
+            break
+
         await asyncio.sleep(POST_INTERVAL)  # To avoid hitting rate limits
 
     save_processed(processed_list)
