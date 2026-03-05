@@ -12,7 +12,7 @@ ARXIV_API = (
     "search_query=cat:astro-ph.*"
     "&sortBy=submittedDate"
     "&sortOrder=descending"
-    "&max_results=50"
+    "&max_results=300"
 )
 
 KEYWORDS = [
@@ -49,7 +49,7 @@ SUBJECT_ROUTING = {
 }
 
 SEEN_IDS_FILE = 'seen_ids.json'
-MAX_SEEN = 800
+MAX_SEEN = 2000
 DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 ABSTRACT_CHANNEL_ID = os.environ["CHANNEL_ABSTRACT"]
 POST_INTERVAL = 1.2  # seconds
