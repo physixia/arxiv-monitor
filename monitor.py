@@ -227,7 +227,7 @@ def main():
     seen_set = set(seen_ids)
     new_seen_ids = list(seen_ids)
 
-    for entry in feed.entries:
+    for entry in reversed(feed.entries):
         arxiv_id = entry.id
         title = entry.title
         summary = entry.summary

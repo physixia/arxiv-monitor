@@ -6,3 +6,5 @@ voice
 processed.json
 voice.py
 run_voice.sh
+launchd_err.log
+launchd_out.log
