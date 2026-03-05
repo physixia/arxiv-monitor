@@ -2,3 +2,6 @@ seen_ids.json
 .venv
 note_and_try
 .env
+voice
+processed.json
+voice.py
