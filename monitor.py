@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 import time
 
-## Settings
+# ==== Setup ====
 ARXIV_API = (
     "http://export.arxiv.org/api/query?"
     "search_query=cat:astro-ph.*"
@@ -54,7 +54,7 @@ ABSTRACT_CHANNEL_ID = os.environ["CHANNEL_ABSTRACT"]
 POST_INTERVAL = 1.2  # seconds
 
 
-## Loading and saving seen arXiv IDs
+# ==== Loading and saving seen arXiv IDs to avoid duplicates ====
 def load_seen_ids():
     if not os.path.exists(SEEN_IDS_FILE):
         return []
@@ -70,7 +70,7 @@ def save_seen_ids(seen_ids):
         json.dump(list(trimmed), f)
 
 
-## ID extraction
+# ==== ID extraction ====
 def extract_arxiv_id(entry_id):
     if not entry_id:
         return None
@@ -78,7 +78,7 @@ def extract_arxiv_id(entry_id):
     return base.split('v')[0] if 'v' in base else base
 
 
-## Keyword and journal matching
+# ==== Keyword and journal matching ====
 def keyword_match(title, summary):
     if not KEYWORDS:
         return True
@@ -95,14 +95,14 @@ def journal_match(comment):
     )
 
 
-## Subject extraction
+# ==== Subject extraction ====
 def get_subjects(entry):
     if not hasattr(entry, 'tags'):
         return "N/A"
     return ','.join(tag['term'] for tag in entry.tags)
 
 
-## Routing based on subjects
+# ==== Routing based on subjects ====
 def route_by_subject(entry):
     if not hasattr(entry, 'arxiv_primary_category'):
         return None
@@ -120,7 +120,7 @@ def build_abstract_message(arxiv_id, title, summary, subjects):
     header = (
         f"arXiv: {arxiv_id}\n"
         f"Title: {title}\n"
-        f"Subjects: {subjects}\n\n"
+        f"Subjects: {subjects}\n"
         f"Abstract:\n"
     )
 
@@ -134,7 +134,7 @@ def build_abstract_message(arxiv_id, title, summary, subjects):
     return header + summary
 
 
-## Discord notification
+# ==== Discord notification ====
 def send_to_discord(channel_id, arxiv_id, title, link, comment, subjects):
 
     time.sleep(POST_INTERVAL)  # To avoid hitting rate limits
@@ -183,7 +183,7 @@ def send_abstract_to_discord(arxiv_id, title, summary, subjects):
         print("Discord error:", response.status_code, response.text)
 
 
-## Link selection
+# ==== Link selection ====
 def get_best_link(entry):
     html_link = None
     pdf_link = None
@@ -200,7 +200,7 @@ def get_best_link(entry):
     return html_link if html_link else pdf_link
 
 
-## Main monitoring function
+# ==== Main monitoring function ====
 def main():
     print("Fethching arXiv data...")
     feed = feedparser.parse(ARXIV_API)
@@ -238,5 +238,6 @@ def main():
     print("Done.")
 
 
+# ==== Entry point ====
 if __name__ == "__main__":
     main()
