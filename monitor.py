@@ -247,11 +247,11 @@ def send_error_to_discord(error_summary, error_details):
     time.sleep(POST_INTERVAL)
 
     bot_name = "arXiv クーリエ"
-    mention = "<@&1115026252156391558>"
+    user_id = "1115026252156391558"
 
     message = (
         f"🚨 **[{bot_name} | エラーレポート]** 🚨\n"
-        f"{mention} 大変ですっ！　配達中にシステムトラブルが発生しました！\n\n"
+        f"<@{user_id}> 大変ですっ！　配達中にシステムトラブルが発生しました！\n\n"
         f"**【状況報告】**\n{error_summary}\n\n"
         f"**【トラブルの詳細】**\n```\n{error_details}\n```"
         f"対応をお願いします！"
