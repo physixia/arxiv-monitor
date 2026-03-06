@@ -70,7 +70,7 @@ def send_log_to_discord(total_processed, category_counts):
     time.sleep(POST_INTERVAL)
 
     if total_processed > 0:
-        breakdown = '\n'.join([f"・ Project **{cat}**: {count}件" for cat, count in category_counts.items() if count > 0])
+        breakdown = '\n'.join([f"・ Project **{cat}**: {count} 件" for cat, count in category_counts.items() if count > 0])
         
         message = (
             f"💼 **[arXiv セクレタリ | 業務報告]**\n"
