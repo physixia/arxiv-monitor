@@ -113,30 +113,38 @@ def translate(title, abstract):
     if not client_openai:
         raise ValueError("OpenAI API key is missing.")
 
+    # Python側で管理する辞書（運用しながら追記していく）
+    glossary_text = """
+- resonance: 共鳴 (NOT レゾナンス)
+- bar: 棒構造 (NOT バー)
+- integration: 積分 (NOT 統合)
+- radial: 動径方向 (NOT 放射状)
+- tangential: 接線方向
+- population: 集団 (NOT ポピュレーション)
+- mass function: 質量関数 (NOT マス関数)
+- ionizing escape: 電離脱出 (NOT イオン化逃避)
+- bremsstrahlung: 制動放射 (NOT ブレムストラールング)
+- binary: 連星 (NOT バイナリ)
+"""
+
     prompt = f"""
-You are a professional scientific translator specializing in astrophysics papers.
+You are a scientific translator processing astrophysics papers for a Text-to-Speech (Voicevox) system.
+Translate the Title and Abstract into Japanese based on the strict rules below.
 
-Translate the following title and abstract into Japanese.
-
-Strict rules:
-- Translate faithfully. Do NOT summarize, interpret, or omit any information.
-- Preserve the exact scientific meaning.
-- Do not add explanations or commentary.
-
-Scientific notation rules:
-- Keep equations, variables, and mathematical symbols unchanged.
-- Keep element and molecule names unchanged (e.g., Fe, CO, H2).
-- Keep units unchanged (e.g., km s^-1, M⊙).
-- Keep redshift notation such as z = 2.3 unchanged.
-- Keep standard astrophysical abbreviations unchanged (e.g., AGN, CMB, SNR).
-
-Japanese style rules:
-- Use natural Japanese suitable for text-to-speech.
-- Use polite tone (です / ます).
-- Avoid extremely long sentences when possible while preserving meaning.
+# Translation Style (DeepL Style):
+- Preserve the exact logical structure and causality of the English sentences.
+- Keep explicit subjects and inanimate subjects (無生物主語). Do NOT force human-centric or overly conversational Japanese. A direct, literal translation is preferred as long as the logical flow is clear and scientifically accurate.
+- Use polite tone (です/ます).
 - Use Japanese punctuation (、。).
 
-Output format:
+# TTS Optimization:
+- Translate mathematical symbols and units into readable Japanese words (e.g., M⊙ -> 太陽質量, km s^-1 -> キロメートル毎秒) so Voicevox can read them flawlessly.
+
+# Mandatory Glossary:
+You MUST use the following Japanese terms. Avoid Katakana transliterations for these physics terms.
+{glossary_text}
+
+# Output format:
 Return ONLY a valid JSON object with the keys "title" and "abstract". 
 Do not include any markdown formatting such as ```json.
 
@@ -330,7 +338,7 @@ async def on_ready():
             except Exception as e:
                 err_trace = traceback.format_exc()
                 await send_error_to_discord(f"ボイスチャンネル送信エラー： {parsed['arxiv_id']} のボイスチャンネルへの送信の失敗。", err_trace)
-                
+
             processed_list.append(str(msg.id))
             processed_set.add(str(msg.id))
             save_processed(processed_list)  # Save after each message to avoid data loss
