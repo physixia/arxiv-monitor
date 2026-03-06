@@ -125,6 +125,8 @@ def translate(title, abstract):
 - ionizing escape: 電離脱出 (NOT イオン化逃避)
 - bremsstrahlung: 制動放射 (NOT ブレムストラールング)
 - binary: 連星 (NOT バイナリ)
+- red giant branch: 赤色巨星分枝 (NOT 赤巨星分枝)
+- nJy: ナノジャンスキー (NOT ナノジャイ, NOT ナノジャウ)
 """
 
     prompt = f"""
@@ -245,7 +247,7 @@ async def send_error_to_discord(error_summary, error_details):
             f"🚨 **[{bot_name} | エラーレポート]** 🚨\n"
             f"<@{user_id}> システムに異常が発生しました。\n\n"
             f"**【状況報告】**\n{error_summary}\n\n"
-            f"**【異常の詳細】**\n```\n{error_details}\n```"
+            f"**【異常の詳細】**\n```\n{error_details}\n```\n"
             f"至急、メンテナンスをお願いします。お大事に……。"
         )
         await err_channel.send(message)

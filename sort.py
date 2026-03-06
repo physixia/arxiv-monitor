@@ -16,6 +16,7 @@ REACTION_ROUTING = {
     "highZ": os.environ["CHANNEL_DEST_HIGHZ"],
     "DM": os.environ["CHANNEL_DEST_DM"],
     "GW": os.environ["CHANNEL_DEST_GW"],
+    "CR": os.environ["CHANNEL_DEST_CR"],
 }
 
 SOURCE_CHANNELS = [
