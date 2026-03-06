@@ -36,6 +36,7 @@ jobs:
           CHANNEL_DEST_DM: ${{ secrets.CHANNEL_DEST_DM }}
           CHANNEL_DEST_GW: ${{ secrets.CHANNEL_DEST_GW }}
           CHANNEL_DEST_CR: ${{ secrets.CHANNEL_DEST_CR }}
+          CHANNEL_DEST_FL: ${{ secrets.CHANNEL_DEST_FL }}
           CHANNEL_LOG: ${{ secrets.CHANNEL_LOG }}
           CHANNEL_ERR: ${{ secrets.CHANNEL_ERR }}
 
