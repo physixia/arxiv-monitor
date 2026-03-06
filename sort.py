@@ -151,6 +151,9 @@ def main():
                     send_message(dest_channel, forward_content)
                     processed_in_this_run = True
 
+                    category_counts[emoji_name] += 1
+                    total_processed += 1
+
             if processed_in_this_run:
                 add_reaction(source_channel, msg["id"], CHECK_EMOJI_URL)
 
