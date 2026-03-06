@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-# ================= SETTINGS =================
+# ================= SETUP =================
 DISCORD_VOICE_TOKEN = os.environ["DISCORD_VOICE_TOKEN"]
 ABSTRACT_CHANNEL_ID = int(os.environ["CHANNEL_ABSTRACT"])
 LOG_CHANNEL_ID = int(os.environ["CHANNEL_LOG"])
@@ -239,11 +239,11 @@ async def send_error_to_discord(error_summary, error_details):
     err_channel = client.get_channel(ERR_CHANNEL_ID)
     if err_channel:
         bot_name = "ナースロボ＿タイプarXiv"
-        mention = "<@&1115026252156391558>"  # Maintenance role mention
+        user_id = "1115026252156391558"  # Maintenance role mention
 
         message = (
             f"🚨 **[{bot_name} | エラーレポート]** 🚨\n"
-            f"{mention} システムに異常が発生しました。\n\n"
+            f"<@{user_id}> システムに異常が発生しました。\n\n"
             f"**【状況報告】**\n{error_summary}\n\n"
             f"**【異常の詳細】**\n```\n{error_details}\n```"
             f"至急、メンテナンスをお願いします。お大事に……。"

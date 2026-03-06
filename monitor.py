@@ -49,12 +49,14 @@ SUBJECT_ROUTING = {
     'astro-ph.SR': os.environ['CHANNEL_SR'],
 }
 
-SEEN_IDS_FILE = 'seen_ids.json'
-MAX_SEEN = 2000
 DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 ABSTRACT_CHANNEL_ID = os.environ["CHANNEL_ABSTRACT"]
 LOG_CHANNEL_ID = os.environ["CHANNEL_LOG"]
 ERR_CHANNEL_ID = os.environ["CHANNEL_ERR"]
+
+SEEN_IDS_FILE = 'seen_ids.json'
+MAX_SEEN = 2000
+
 POST_INTERVAL = 1.2  # seconds
 
 
@@ -213,7 +215,7 @@ def send_log_to_discord(fetched_count, hit_count, channel_counts):
 
     if hit_count > 0:
         message = (
-            f"🌠 **[arXiv courier | 配達レポート]**\n"
+            f"🌠 **[arXiv クーリエ | 配達レポート]**\n"
             f"こちらクーリエ！　最新アーカイブの周回軌道から戻りました！🚀\n"
             f"新しくスキャンした論文は **{fetched_count}** 件、"
             f"そのうち指定の条件に合う **{hit_count}** 件の Abstract を各ステーションへ配達済みです！\n\n"
@@ -222,7 +224,7 @@ def send_log_to_discord(fetched_count, hit_count, channel_counts):
         )
     else:
         message = (
-            f"🌠 **[arXiv courier | 配達レポート]**\n"
+            f"🌠 **[arXiv クーリエ | 配達レポート]**\n"
             f"こちらクーリエ！　最新アーカイブの周回軌道から戻りました！🚀\n"
             f"新しくスキャンした論文は **{fetched_count}** 件でしたが、"
             f"今回は条件に合う論文は見つかりませんでした。\n\n"
