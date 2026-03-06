@@ -38,4 +38,4 @@ jobs:
           CHANNEL_LOG: ${{ secrets.CHANNEL_LOG }}
           CHANNEL_ERR: ${{ secrets.CHANNEL_ERR }}
 
-        run: python sorter.py
+        run: python sort.py
