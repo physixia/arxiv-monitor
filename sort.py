@@ -155,6 +155,7 @@ def main():
                 add_reaction(source_channel, msg["id"], CHECK_EMOJI_URL)
 
     print("Scan completed.")
+    send_log_to_discord(total_processed, category_counts)
 
 
 if __name__ == "__main__":
