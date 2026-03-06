@@ -214,7 +214,7 @@ def send_log_to_discord(fetched_count, hit_count, channel_counts):
     if hit_count > 0:
         message = (
             f"🌠 **[arXiv courier | 配達レポート]**\n"
-            f"こちらクーリエ！　最新アーカイブの周回軌道から戻りました！🚀\n\n"
+            f"こちらクーリエ！　最新アーカイブの周回軌道から戻りました！🚀\n"
             f"新しくスキャンした論文は **{fetched_count}** 件、"
             f"そのうち指定の条件に合う **{hit_count}** 件の Abstract を各ステーションへ配達済みです！\n\n"
             f"📊 **【配達内訳】**\n{breakdown}\n\n"
@@ -223,7 +223,7 @@ def send_log_to_discord(fetched_count, hit_count, channel_counts):
     else:
         message = (
             f"🌠 **[arXiv courier | 配達レポート]**\n"
-            f"こちらクーリエ！　最新アーカイブの周回軌道から戻りました！🚀\n\n"
+            f"こちらクーリエ！　最新アーカイブの周回軌道から戻りました！🚀\n"
             f"新しくスキャンした論文は **{fetched_count}** 件でしたが、"
             f"今回は条件に合う論文は見つかりませんでした。\n\n"
             f"次の巡回まで、ステーションで待機しますね！"
