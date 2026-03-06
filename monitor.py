@@ -211,7 +211,7 @@ def send_abstract_to_discord(arxiv_id, title, summary, subjects):
 def send_log_to_discord(fetched_count, hit_count, channel_counts):
     time.sleep(POST_INTERVAL)  # To avoid hitting rate limits
 
-    breakdown = '\n'.join([f"・ `{subj}`: {count}件" for subj, count in channel_counts.items() if count > 0])
+    breakdown = '\n'.join([f"・ `{subj}`: {count} 件" for subj, count in channel_counts.items() if count > 0])
 
     if fetched_count == 0:
         message = (
