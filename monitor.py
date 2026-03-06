@@ -3,6 +3,7 @@ import requests
 import json
 import os
 import re
+import traceback
 from datetime import datetime
 import time
 
@@ -53,6 +54,7 @@ MAX_SEEN = 2000
 DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 ABSTRACT_CHANNEL_ID = os.environ["CHANNEL_ABSTRACT"]
 LOG_CHANNEL_ID = os.environ["CHANNEL_LOG"]
+ERR_CHANNEL_ID = os.environ["CHANNEL_ERR"]
 POST_INTERVAL = 1.2  # seconds
 
 
@@ -177,7 +179,7 @@ def send_to_discord(channel_id, arxiv_id, title, link, comment, subjects):
         url,
         headers=headers,
         json={"content": message},
-        timeout=10
+        timeout=30
     )
     if response.status_code not in (200, 201):
         print("Discord error:", response.status_code, response.text)
@@ -198,7 +200,7 @@ def send_abstract_to_discord(arxiv_id, title, summary, subjects):
         url,
         headers=headers,
         json={"content": message},
-        timeout=10
+        timeout=30
     )
     if response.status_code not in (200, 201):
         print("Discord error:", response.status_code, response.text)
@@ -235,10 +237,42 @@ def send_log_to_discord(fetched_count, hit_count, channel_counts):
         url,
         headers=headers,
         json={"content": message},
-        timeout=10
+        timeout=30
     )
     if response.status_code not in (200, 201):
         print("Discord error:", response.status_code, response.text)
+
+
+def send_error_to_discord(error_summary, error_details):
+    time.sleep(POST_INTERVAL)
+
+    bot_name = "arXiv クーリエ"
+    mention = "<@&1115026252156391558>"
+
+    message = (
+        f"🚨 **[{bot_name} | エラーレポート]** 🚨\n"
+        f"{mention} 大変ですっ！　配達中にシステムトラブルが発生しました！\n\n"
+        f"**【状況報告】**\n{error_summary}\n\n"
+        f"**【トラブルの詳細】**\n```\n{error_details}\n```"
+        f"対応をお願いします！"
+    )
+
+    url = f"https://discord.com/api/v10/channels/{ERR_CHANNEL_ID}/messages"
+    headers = {
+        "Authorization": f"Bot {DISCORD_BOT_TOKEN}",
+    }
+    
+    try:
+        response = requests.post(
+            url,
+            headers=headers,
+            json={"content": message},
+            timeout=30
+        )
+        if response.status_code not in (200, 201):
+            print("Discord error:", response.status_code, response.text)
+    except Exception as e:
+        print(f"Failed to send error message to Discord: {e}")
 
 
 # ==== Link selection ====
@@ -319,4 +353,10 @@ def main():
 
 # ==== Entry point ====
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        err_trace = traceback.format_exc()
+        print(f"Critical error occurred: {e}")
+        send_error_to_discord("システム全体が停止する致命的なエラーが発生しました！", err_trace)
+        raise

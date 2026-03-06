@@ -14,6 +14,8 @@ words = [
     ("TeV", "テヴ", 2),
     ("PeV", "ペヴ", 2),
     ("EeV", "イーヴ", 2),
+    ("GW", "ジーダブリュー", 4),
+    ("系外惑星", "ケイガイワクセイ", 6),
 ]
 
 # Fetch current user dictionary
