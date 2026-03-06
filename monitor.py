@@ -213,6 +213,14 @@ def send_log_to_discord(fetched_count, hit_count, channel_counts):
 
     breakdown = '\n'.join([f"・ `{subj}`: {count}件" for subj, count in channel_counts.items() if count > 0])
 
+    if fetched_count == 0:
+        message = (
+            f"🌠 **[arXiv クーリエ | 配達レポート]**\n"
+            f"こちらクーリエ！　最新アーカイブの周回軌道から戻りました！🚀\n"
+            f"今回は新しくスキャンした論文はありませんでした！\n"
+            f"次の巡回を楽しみにしていてくださいね！"
+        )
+
     if hit_count > 0:
         message = (
             f"🌠 **[arXiv クーリエ | 配達レポート]**\n"
