@@ -39,6 +39,7 @@ jobs:
           CHANNEL_SR: ${{ secrets.CHANNEL_SR }}
           CHANNEL_ABSTRACT: ${{ secrets.CHANNEL_ABSTRACT }}
           CHANNEL_LOG: ${{ secrets.CHANNEL_LOG }}
+          CHANNEL_ERR: ${{ secrets.CHANNEL_ERR }}
 
       - name: Commit updated IDs
         run: |

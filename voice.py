@@ -110,6 +110,9 @@ def split_sentences(text):
 
 # ================= Translation using OpenAI (fallback) =================
 def translate(title, abstract):
+    if not client_openai:
+        raise ValueError("OpenAI API key is missing.")
+
     prompt = f"""
 You are a professional scientific translator specializing in astrophysics papers.
 
@@ -141,7 +144,7 @@ Text:
 Title: {title}
 Abstract: {abstract}
 """
-    
+
     response = client_openai.chat.completions.create(
         model="gpt-4o-mini",
         response_format={"type": "json_object"},
@@ -150,6 +153,7 @@ Abstract: {abstract}
             {"role": "user", "content": prompt}
         ],
         temperature=0.2,
+        timeout=30
     )
 
     result = json.loads(response.choices[0].message.content)
@@ -158,24 +162,20 @@ Abstract: {abstract}
 
 # ================= VOICEVOX =================
 def synthesise_text(text):
-    try:
-        q = requests.post(
-            f"{VOICEVOX_API_URL}/audio_query",
-            params={"text": text, "speaker": SPEAKER_ID}
-        ).json()
+    q = requests.post(
+        f"{VOICEVOX_API_URL}/audio_query",
+        params={"text": text, "speaker": SPEAKER_ID}
+    ).json()
 
-        q["postPhonemeLength"] += 0.5
+    q["postPhonemeLength"] += 0.5
 
-        r = requests.post(
-            f"{VOICEVOX_API_URL}/synthesis",
-            params={"speaker": SPEAKER_ID},
-            json=q
-        )
-        r.raise_for_status()
-        return r.content
-    except Exception as e:
-        print("Voice synthesis error:", e)
-        return b""
+    r = requests.post(
+        f"{VOICEVOX_API_URL}/synthesis",
+        params={"speaker": SPEAKER_ID},
+        json=q
+    )
+    r.raise_for_status()
+    return r.content
     
 
 def combine_wave_bytes(wav_bytes_list):
@@ -200,7 +200,6 @@ def combine_wave_bytes(wav_bytes_list):
 
     
 def synthesise(title, subjects_ja, is_truncated, abstract):
-
     # input texts should be translated to Japanese
     ms_header = "新しいアーカイブ論文が投稿されました。"
     ms_title = f"タイトルは「{title}」です。"
@@ -287,7 +286,13 @@ async def on_ready():
             print(f"Processing {parsed['arxiv_id']} ...")
 
             # Translation
-            title_ja, abstract_ja = await asyncio.to_thread(translate, parsed["title"], parsed["abstract"])
+            try:
+                title_ja, abstract_ja = await asyncio.to_thread(translate, parsed["title"], parsed["abstract"])
+            except Exception as e:
+                err_trace = traceback.format_exc()
+                await send_error_to_discord(f"翻訳エラー： {parsed['arxiv_id']} の翻訳の失敗。\nタイトルおよびアブストラクトは英語で返されます。", err_trace)
+                title_ja, abstract_ja = parsed["title"], parsed["abstract"]
+
             subjects_mapping = {
                 "astro-ph.CO": "宇宙論及び銀河を除く天体物理学",
                 "astro-ph.EP": "地球物理学および惑星物理学",
@@ -300,20 +305,32 @@ async def on_ready():
 
             # Synthesis
             output_file = VOICE_OUTPUT_DIR / f"{parsed['arxiv_id'].replace('/', '_')}.wav"
-            audio_data = await asyncio.to_thread(synthesise, title_ja, subjects_ja, parsed["is_truncated"], abstract_ja)
-            save_audio(audio_data, output_file)
+            try:
+                audio_data = await asyncio.to_thread(synthesise, title_ja, subjects_ja, parsed["is_truncated"], abstract_ja)
+                save_audio(audio_data, output_file)
+            except Exception as e:
+                err_trace = traceback.format_exc()
+                await send_error_to_discord(f"音声合成エラー： {parsed['arxiv_id']} の音声合成の失敗。\n処理はスキップされます", err_trace)
+                continue
 
             print(f"Processed {parsed['arxiv_id']} - saved to {output_file}")
 
             # Post to voice channel
-            voice_channel_id = VOICE_CHANNELS.get(parsed["subjects"])
-            if voice_channel_id:
-                vc = client.get_channel(voice_channel_id)
-                if vc:
-                    await vc.send(file=discord.File(output_file))
-                else:
-                    print(f"Error: Voice channel with ID {voice_channel_id} not found.")
-
+            try:
+                voice_channel_id = VOICE_CHANNELS.get(parsed["subjects"])
+                if voice_channel_id:
+                    vc = client.get_channel(voice_channel_id)
+                    if vc:
+                        text_translated = f"**【{parsed['arxiv_id']}】{title_ja}**\n\n{abstract_ja}"
+                        if len(text_translated) > 1990:
+                            text_translated = text_translated[:1990] + "..."
+                        await vc.send(text_translated, file=discord.File(output_file))
+                    else:
+                        raise ValueError(f"Voice channel with ID {voice_channel_id} not found.")
+            except Exception as e:
+                err_trace = traceback.format_exc()
+                await send_error_to_discord(f"ボイスチャンネル送信エラー： {parsed['arxiv_id']} のボイスチャンネルへの送信の失敗。", err_trace)
+                
             processed_list.append(str(msg.id))
             processed_set.add(str(msg.id))
             save_processed(processed_list)  # Save after each message to avoid data loss
