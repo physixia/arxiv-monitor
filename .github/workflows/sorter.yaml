@@ -1,0 +1,41 @@
+name: Discord Reaction Sorter
+
+on:
+  schedule:
+    - cron: '30 * * * *'  # executes every hour at minute 30
+  workflow_dispatch:
+
+jobs:
+  run-sorter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkoutp@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Sorter Bot
+        env:
+          DISCORD_SORT_TOKEN: ${{ secrets.DISCORD_SORT_TOKEN }}
+          CHANNEL_CO: ${{ secrets.CHANNEL_CO }}
+          CHANNEL_EP: ${{ secrets.CHANNEL_EP }}
+          CHANNEL_GA: ${{ secrets.CHANNEL_GA }}
+          CHANNEL_HE: ${{ secrets.CHANNEL_HE }}
+          CHANNEL_IM: ${{ secrets.CHANNEL_IM }}
+          CHANNEL_SR: ${{ secrets.CHANNEL_SR }}
+          CHANNEL_DEST_AGN: ${{ secrets.CHANNEL_DEST_AGN }}
+          CHANNEL_DEST_SNR: ${{ secrets.CHANNEL_DEST_SNR }}
+          CHANNEL_DEST_BH: ${{ secrets.CHANNEL_DEST_BH }}
+          CHANNEL_DEST_HIGHZ: ${{ secrets.CHANNEL_DEST_HIGHZ }}
+          CHANNEL_DEST_DM: ${{ secrets.CHANNEL_DEST_DM }}
+          CHANNEL_DEST_GW: ${{ secrets.CHANNEL_DEST_GW }}
+          CHANNEL_LOG: ${{ secrets.CHANNEL_LOG }}
+          CHANNEL_ERR: ${{ secrets.CHANNEL_ERR }}
+
+        run: python sorter.py
