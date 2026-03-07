@@ -17,6 +17,7 @@ load_dotenv()
 
 # ================= SETUP =================
 DISCORD_VOICE_TOKEN = os.environ["DISCORD_VOICE_TOKEN"]
+DISCORD_USER_ID = os.environ["DISCORD_USER_ID"]
 ABSTRACT_CHANNEL_ID = int(os.environ["CHANNEL_ABSTRACT"])
 LOG_CHANNEL_ID = int(os.environ["CHANNEL_LOG"])
 ERR_CHANNEL_ID = int(os.environ["CHANNEL_ERR"])
@@ -244,7 +245,7 @@ async def send_error_to_discord(error_summary, error_details):
     err_channel = client.get_channel(ERR_CHANNEL_ID)
     if err_channel:
         bot_name = "ナースロボ＿タイプarXiv"
-        user_id = "1115026252156391558"  # Maintenance role mention
+        user_id = DISCORD_USER_ID
 
         message = (
             f"🚨 **[{bot_name} | エラーレポート]** 🚨\n"
