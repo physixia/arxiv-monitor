@@ -125,15 +125,15 @@ def build_abstract_message(arxiv_id, title, summary, subjects):
 
     MAX_TOTAL_LENGTH = 1950
 
-    header_template = (
+    header_base = (
         f"arXiv: {arxiv_id}\n"
         f"Title: {title}\n"
         f"Subjects: {subjects}\n"
-        "Truncated: {is_truncated}\n"
-        "Abstract:\n"
+        "Truncated: \n"
     )
 
-    max_summary_length = MAX_TOTAL_LENGTH - len(header_template.format(is_truncated=False))
+    header_false_str = header_base + "False\nAbstract:\n"
+    max_summary_length = MAX_TOTAL_LENGTH - len(header_false_str)
 
     is_truncated = False
 
@@ -152,7 +152,7 @@ def build_abstract_message(arxiv_id, title, summary, subjects):
             else:
                 summary = cut_summary
 
-    header = header_template.format(is_truncated=is_truncated)
+    header = header_base + f"{is_truncated}\nAbstract:\n"
 
     return header + summary
 
