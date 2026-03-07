@@ -21,6 +21,7 @@ REACTION_ROUTING = {
     "FL": os.environ["CHANNEL_DEST_FL"],
     "SF": os.environ["CHANNEL_DEST_SF"],
     "exoP": os.environ["CHANNEL_DEST_EXOP"],
+    "Xray": os.environ["CHANNEL_DEST_XRAY"],
 }
 
 SOURCE_CHANNELS = [

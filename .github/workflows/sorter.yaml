@@ -40,6 +40,7 @@ jobs:
           CHANNEL_DEST_FL: ${{ secrets.CHANNEL_DEST_FL }}
           CHANNEL_DEST_SF: ${{ secrets.CHANNEL_DEST_SF }}
           CHANNEL_DEST_EXOP: ${{ secrets.CHANNEL_DEST_EXOP }}
+          CHANNEL_DEST_XRAY: ${{ secrets.CHANNEL_DEST_XRAY }}
           CHANNEL_LOG: ${{ secrets.CHANNEL_LOG }}
           CHANNEL_ERR: ${{ secrets.CHANNEL_ERR }}
 
