@@ -2,6 +2,7 @@ import os
 import requests
 import time
 import traceback
+import urllib.parse
 
 
 # ================= SETUP =================
@@ -62,13 +63,13 @@ def send_message(channel_id, content):
     if response.status_code not in (200, 201):
         print(f"Failed to send message to channel {channel_id}: {response.status_code} - {response.text}")
 
-def add_reaction(channel_id, message_id, emoji):
+def add_reaction(channel_id, message_id, emoji_url_param):
     time.sleep(POST_INTERVAL)
 
-    url = f"https://discord.com/api/v10/channels/{channel_id}/messages/{message_id}/reactions/{emoji}/@me"
+    url = f"https://discord.com/api/v10/channels/{channel_id}/messages/{message_id}/reactions/{emoji_url_param}/@me"
     response = requests.put(url, headers=HEADERS)
     if response.status_code != 204:
-        print(f"Failed to add reaction to message {message_id} in channel {channel_id}: {response.status_code} - {response.text}")
+        print(f"Failed to add {emoji_url_param} to message {message_id} in channel {channel_id}: {response.status_code} - {response.text}")
 
 
 # ================= Logging and Error Reporting =================
@@ -140,11 +141,14 @@ def main():
             if already_processed:
                 continue
 
-            processed_in_this_run = False
+            # processed_in_this_run = False
             for reaction in reactions:
-                emoji_name = reaction.get("emoji", {}).get("name")
+                emoji = reaction.get("emoji", {})
+                emoji_name = emoji.get("name")
+                emoji_id = emoji.get("id")
+                me_reacted = reaction.get("me", False)
 
-                if emoji_name in REACTION_ROUTING:
+                if emoji_name in REACTION_ROUTING and not me_reacted:
                     dest_channel = REACTION_ROUTING[emoji_name]
 
                     msg_link = f"https://discord.com/channels/{msg.get('guild_id', '@me')}/{source_channel}/{msg['id']}"
@@ -155,13 +159,17 @@ def main():
                     )
 
                     send_message(dest_channel, forward_content)
-                    processed_in_this_run = True
+                    # processed_in_this_run = True
+
+                    if emoji_id:
+                        emoji_url_param = f"{emoji_name}:{emoji_id}"
+                    else:
+                        emoji_url_param = urllib.parse.quote(emoji_name)
+
+                    add_reaction(source_channel, msg["id"], emoji_url_param)
 
                     category_counts[emoji_name] += 1
                     total_processed += 1
-
-            if processed_in_this_run:
-                add_reaction(source_channel, msg["id"], CHECK_EMOJI_URL)
 
     print("Scan completed.")
     send_log_to_discord(total_processed, category_counts)
