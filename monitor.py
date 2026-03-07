@@ -30,6 +30,7 @@ KEYWORDS = [
 ]
 
 JOURNALS = [
+    # added on 2026-03-05
     'ApJ',
     'MNRAS',
     'A&A',
@@ -38,6 +39,18 @@ JOURNALS = [
     'ApJL',
     'PRL',
     'Astronomy & Astrophysics',
+    #
+    # added on 2026-03-07
+    'AJ',
+    'Astronomical Journal',
+    'Astronomy and Astrophysics',
+    'ApJS',
+    'PASA',
+    'PASJ',
+    'Philosophical Transactions of the Royal Society A',
+    'Physical Review D',
+    'Journal of Cosmology and Astroparticle Physics',
+    'RNAAS',
 ]
 
 SUBJECT_ROUTING = {
@@ -332,24 +345,14 @@ def main():
         # webhook = route_by_subject(entry)
         channel_id = route_by_subject(entry)
 
-        # if arxiv_id in seen_set:
-        #     continue
+        if arxiv_id in seen_set:
+            continue
 
+        '''
         # ===========================================
         # temporary program when new journals are added
         # when use this, make sure to comment out "if arxiv_id in seen_set: continue" block above
-        TEMP_NEW_JOURNALS = [
-            'AJ',
-            'Astronomical Journal',
-            'Astronomy and Astrophysics',
-            'ApJS',
-            'PASA',
-            'PASJ',
-            'Philosophical Transactions of the Royal Society A',
-            'Physical Review D',
-            'Journal of Cosmology and Astroparticle Physics',
-            'RNAAS',
-        ]
+        TEMP_NEW_JOURNALS = []
 
         if arxiv_id in seen_set:
             if comment and any(j in comment for j in TEMP_NEW_JOURNALS) and(
@@ -371,7 +374,7 @@ def main():
                             channel_counts[primary] += 1
             continue
         # ===========================================
-
+        '''
 
         new_seen_ids.append(arxiv_id)
         seen_set.add(arxiv_id)
