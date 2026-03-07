@@ -66,6 +66,7 @@ DISCORD_BOT_TOKEN = os.environ["DISCORD_BOT_TOKEN"]
 ABSTRACT_CHANNEL_ID = os.environ["CHANNEL_ABSTRACT"]
 LOG_CHANNEL_ID = os.environ["CHANNEL_LOG"]
 ERR_CHANNEL_ID = os.environ["CHANNEL_ERR"]
+DISCORD_USER_ID = os.environ["DISCORD_USER_ID"]
 
 SEEN_IDS_FILE = 'seen_ids.json'
 MAX_SEEN = 2000
@@ -270,7 +271,7 @@ def send_error_to_discord(error_summary, error_details):
     time.sleep(POST_INTERVAL)
 
     bot_name = "arXiv クーリエ"
-    user_id = "1115026252156391558"
+    user_id = DISCORD_USER_ID
 
     message = (
         f"🚨 **[{bot_name} | エラーレポート]** 🚨\n"

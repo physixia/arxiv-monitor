@@ -6,6 +6,7 @@ import traceback
 
 # ================= SETUP =================
 DISCORD_SORT_TOKEN = os.environ["DISCORD_SORT_TOKEN"]
+DISCORD_USER_ID = os.environ["DISCORD_USER_ID"]
 CHECK_EMOJI_URL = "%E2%9C%85"
 CHECK_EMOJI_UNICODE = "✅"
 
@@ -96,7 +97,7 @@ def send_log_to_discord(total_processed, category_counts):
 def send_error_to_discord(error_details):
     time.sleep(POST_INTERVAL)
 
-    user_id = "1115026252156391558"
+    user_id = DISCORD_USER_ID
 
     message = (
         f"🚨 **[arXiv セクレタリ | 緊急事態]**\n"

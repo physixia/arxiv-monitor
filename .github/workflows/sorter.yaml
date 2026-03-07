@@ -23,6 +23,7 @@ jobs:
       - name: Run Sorter Bot
         env:
           DISCORD_SORT_TOKEN: ${{ secrets.DISCORD_SORT_TOKEN }}
+          DISCORD_USER_ID: ${{ secrets.DISCORD_USER_ID }}
           CHANNEL_CO: ${{ secrets.CHANNEL_CO }}
           CHANNEL_EP: ${{ secrets.CHANNEL_EP }}
           CHANNEL_GA: ${{ secrets.CHANNEL_GA }}

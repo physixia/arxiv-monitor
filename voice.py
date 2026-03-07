@@ -40,7 +40,7 @@ VOICE_CHANNELS = {
     "astro-ph.SR": int(os.environ["CHANNEL_VOICE_SR"]),
 }
 
-# DeepL
+# DeepL (deprecated)
 #DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY")
 #translator = deepl.Translator(DEEPL_API_KEY) if DEEPL_API_KEY else None
 
@@ -94,6 +94,8 @@ def split_sentences(text):
         sentences.append(parts[-1].strip())
     return sentences
 
+
+# ================= Translation using DeepL (deprecated) =================
 # def translate(text):
 #     if translator:
 #         try:
@@ -127,6 +129,7 @@ def translate(title, abstract):
 - binary: 連星 (NOT バイナリ)
 - red giant branch: 赤色巨星分枝 (NOT 赤巨星分枝)
 - nJy: ナノジャンスキー (NOT ナノジャイ, NOT ナノジャウ)
+- episodic: 断続的な (NOT エピソード的な)
 """
 
     prompt = f"""
@@ -247,7 +250,7 @@ async def send_error_to_discord(error_summary, error_details):
             f"🚨 **[{bot_name} | エラーレポート]** 🚨\n"
             f"<@{user_id}> システムに異常が発生しました。\n\n"
             f"**【状況報告】**\n{error_summary}\n\n"
-            f"**【異常の詳細】**\n```\n{error_details}\n```\n"
+            f"**【異常の詳細】**\n```\n{error_details}\n```\n\n"
             f"至急、メンテナンスをお願いします。お大事に……。"
         )
         await err_channel.send(message)
