@@ -277,7 +277,7 @@ def send_error_to_discord(error_summary, error_details):
         f"🚨 **[{bot_name} | エラーレポート]** 🚨\n"
         f"<@{user_id}> 大変ですっ！　配達中にシステムトラブルが発生しました！\n\n"
         f"**【状況報告】**\n{error_summary}\n\n"
-        f"**【トラブルの詳細】**\n```\n{error_details}\n```"
+        f"**【トラブルの詳細】**\n```\n{error_details}\n```\n\n"
         f"対応をお願いします！"
     )
 
