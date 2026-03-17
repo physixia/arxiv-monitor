@@ -131,6 +131,7 @@ def translate(title, abstract):
 - red giant branch: 赤色巨星分枝 (NOT 赤巨星分枝)
 - nJy: ナノジャンスキー (NOT ナノジャイ, NOT ナノジャウ)
 - episodic: 断続的な (NOT エピソード的な)
+- accretion: 降着 (NOT 吸収)
 """
 
     prompt = f"""
@@ -167,7 +168,7 @@ Abstract: {abstract}
             {"role": "user", "content": prompt}
         ],
         temperature=0.2,
-        timeout=30
+        timeout=60
     )
 
     result = json.loads(response.choices[0].message.content)
@@ -254,6 +255,10 @@ async def send_error_to_discord(error_summary, error_details):
             f"**【異常の詳細】**\n```\n{error_details}\n```\n\n"
             f"至急、メンテナンスをお願いします。お大事に……。"
         )
+
+        if len(message) > 1900:
+            message = message[:1900] + "\n...[文字数上限のため省略されました]\n```"
+
         await err_channel.send(message)
     else:
         print(f"Error: Error channel with ID {ERR_CHANNEL_ID} not found. Cannot send error message.")
